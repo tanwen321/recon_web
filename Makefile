@@ -2,10 +2,10 @@ PROJECT = recon_web
 
 DEPS = lager cowboy jsx recon
 
-dep_lager = git git://github.com/basho/lager.git 2.0.3
-dep_cowboy = git git://github.com/ninenines/cowboy.git 1.0.1
-dep_jsx = git git://github.com/talentdeficit/jsx.git v2.6.0
-dep_recon = git git://github.com/ferd/recon.git 2.2.1
+dep_lager = git git://github.com/basho/lager.git 3.9.2
+dep_cowboy = git git://github.com/ninenines/cowboy.git 2.9.0
+dep_jsx = git git://github.com/talentdeficit/jsx.git v3.1.0
+dep_recon = git git://github.com/ferd/recon.git 2.5.2
 
 include erlang.mk
 

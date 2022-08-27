@@ -1,5 +1,8 @@
 -module(recon_web_protocol).
--compile([export_all, {no_auto_import, [error/2]}]).
+%%-compile([export_all, {no_auto_import, [error/2]}]).
+-compile({no_auto_import,[error/2]}).
+-compile(nowarn_export_all).
+-compile(export_all).
 -include_lib("eunit/include/eunit.hrl").
 %%source code was taken from https://github.com/yrashk/socket.io-erlang/blob/master/src/socketio_data_v1.erl
 

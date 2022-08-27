@@ -19,7 +19,7 @@
   notify_handler_have_new_message/2]).
 
 %%CALLBACK
--export([init/3,
+-export([init/2,
   info/3,
   terminate/3,
   handle/2,
@@ -41,11 +41,15 @@ notify_handler_have_new_message(HanderPid, SessionPid) ->
 %%  handlers callbacks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-init({_, http}, Req, [Config]) ->
-  {Method, _} = cowboy_req:method(Req),
-  {PathInfo, _} = cowboy_req:path_info(Req),
-  init_by_method(Method, PathInfo, Config, Req).
+% init({_, http}, Req, [Config]) ->
+%   {Method, _} = cowboy_req:method(Req),
+%   {PathInfo, _} = cowboy_req:path_info(Req),
+%   init_by_method(Method, PathInfo, Config, Req).
 
+init(Req, [Config]) ->
+  Method = cowboy_req:method(Req),
+  PathInfo = cowboy_req:path_info(Req),
+  init_by_method(Method, PathInfo, Config, Req).
 %%1) http://127.0.0.1:8080/socket.io/1/?t=1436608179209
 init_by_method(_Method, [] = _PathInfo,
     Config = #config{heartbeat_timeout = HeartbeatTimeout, session_timeout = SessionTimeout, opts = Opts},
@@ -56,7 +60,7 @@ init_by_method(_Method, [] = _PathInfo,
 
   {ok, _SessionPid} = recon_web_session:create(Sid, SessionTimeout, Opts),
   Result = << ":", HeartbeatTimeoutBin/binary, ":", SessionTimeoutBin/binary, ":websocket, xhr-polling">>,
-  {ok, Req1} = cowboy_req:reply(200, ?TEXT_HEAD, <<Sid/binary, Result/binary>>, Req),
+  Req1 = cowboy_req:reply(200, ?TEXT_HEAD, <<Sid/binary, Result/binary>>, Req),
   {ok, Req1, #http_state{action = ?CREATE_SESSION, config = Config}};
 
 %%2) ws://127.0.0.1:8080/socket.io/1/websocket/8080fa8492eb609e79471f1c5e396681 GET
@@ -120,7 +124,10 @@ terminate(_Reason, _Req, _HttpState = #http_state{heartbeat_tref = HeartbeatTRef
   case HeartbeatTRef of
     undefined -> ok;
     _ -> erlang:cancel_timer(HeartbeatTRef)
-  end.
+  end;
+terminate(_Reason, _Req, _HttpState) ->
+  lager:error("terminate _Reason:~p, _Req:~p, _HttpState:~p", [_Reason, _Req, _HttpState]),
+  ok.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% %% Http handlers callbacks
@@ -129,19 +136,19 @@ handle(Req, HttpState = #http_state{action = ?CREATE_SESSION}) ->
   {ok, Req, HttpState};
 
 handle(Req, HttpState = #http_state{action = ?SESSION_NOT_FIND}) ->
-  {ok, Req1} = cowboy_req:reply(404, [], <<>>, Req),
+  Req1 = cowboy_req:reply(404, [], <<>>, Req),
   {ok, Req1, HttpState};
 
 handle(Req, HttpState = #http_state{action = ?SESSION_IN_USE}) ->
-  {ok, Req1} = cowboy_req:reply(404, [], <<>>, Req),
+  Req1 = cowboy_req:reply(404, [], <<>>, Req),
   {ok, Req1, HttpState};
 
 handle(Req, HttpState = #http_state{action = ?OK}) ->
-  {ok, Req1} = cowboy_req:reply(200, ?TEXT_HEAD, <<>>, Req),
+  Req1 = cowboy_req:reply(200, ?TEXT_HEAD, <<>>, Req),
   {ok, Req1, HttpState};
 
 handle(Req, HttpState) ->
-  {ok, Req1} = cowboy_req:reply(404, [], <<>>, Req),
+  Req1 = cowboy_req:reply(404, [], <<>>, Req),
   {ok, Req1, HttpState}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

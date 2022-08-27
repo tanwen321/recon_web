@@ -10,7 +10,8 @@ pid_to_binary(Pid) ->
     list_to_binary(pid_to_list(Pid)).
 
 urlencode_pid(Pid) ->
-    http_uri:encode(pid_to_list(Pid)).
+%    http_uri:encode(pid_to_list(Pid)).
+    edoc_lib:escape_uri(pid_to_list(Pid)).
 
 to_atom_or_binary(Value)when is_list(Value) ->
     list_to_binary(Value);
@@ -18,7 +19,8 @@ to_atom_or_binary(Value) ->
     Value.
 
 urlencode_port(Port) ->
-    http_uri:encode(erlang:port_to_list(Port)).
+%    http_uri:encode(erlang:port_to_list(Port)).
+    edoc_lib:escape_uri(erlang:port_to_list(Port)).
 
 port_to_binary(Port) ->
     list_to_binary(erlang:port_to_list(Port)).
